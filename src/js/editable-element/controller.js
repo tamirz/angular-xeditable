@@ -62,7 +62,8 @@ angular.module('xeditable').factory('editableController',
      * @var {string|attribute} buttons
      * @memberOf editable-element
      */    
-    self.buttons = 'right'; 
+    self.buttons = 'right';
+
     /**
      * Action when control losses focus. Values: `cancel|submit|ignore`.
      * Has sense only for single editable element.
@@ -70,7 +71,7 @@ angular.module('xeditable').factory('editableController',
      * 
      * @var {string|attribute} blur
      * @memberOf editable-element
-     */     
+     */
     // no real `blur` property as it is transfered to editable form
 
     //init
@@ -188,13 +189,18 @@ angular.module('xeditable').factory('editableController',
 
       //build buttons
       if(self.buttons !== 'no') {
-        self.buttonsEl = angular.element(theme.buttonsTpl);
-        self.submitEl = angular.element(theme.submitTpl);
-        self.cancelEl = angular.element(theme.cancelTpl);
-        self.buttonsEl.append(self.submitEl).append(self.cancelEl);
-        self.controlsEl.append(self.buttonsEl);
-        
-        self.inputEl.addClass('editable-has-buttons');
+          self.buttonsEl = angular.element(theme.buttonsTpl);
+          self.submitEl = angular.element(theme.submitTpl);
+          self.cancelEl = angular.element(theme.cancelTpl);
+          self.unlimitedEl = angular.element(theme.unlimitedTpl);
+          if ($attrs.unlimtedEnabled == 'false') {
+              self.buttonsEl.append(self.submitEl).append(self.cancelEl);
+          } else {
+              self.buttonsEl.append(self.submitEl).append(self.cancelEl).append(self.unlimitedEl);
+          }
+          self.controlsEl.append(self.buttonsEl);
+
+          self.inputEl.addClass('editable-has-buttons');
       }
 
       //build error
@@ -439,6 +445,7 @@ angular.module('xeditable').factory('editableController',
     self.onshow = angular.noop;
     self.onhide = angular.noop;
     self.oncancel = angular.noop;
+    self.onunlimited = angular.noop;
     self.onbeforesave = angular.noop;
     self.onaftersave = angular.noop;
   }

@@ -222,6 +222,17 @@ angular.module('xeditable').factory('editableFormController',
       });
     },
 
+    $setUnlimited: function() {
+      if (!this.$visible) {
+        return;
+      }
+      //clear errors
+      this.$setError(null, '');
+      //set null to be represented as unlimited
+      this.$editables[0]['scope']['$data'] = null;
+      this.$submit();
+    },
+
     $submit: function() {
       if (this.$waiting) {
         return;
