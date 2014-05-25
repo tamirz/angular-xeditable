@@ -322,8 +322,8 @@ angular.module('xeditable').factory('editableController',
      * 
      * @var {string|attribute} buttons
      * @memberOf editable-element
-     */    
-    self.buttons = 'right'; 
+     */
+    self.buttons = 'right';
     /**
      * Action when control losses focus. Values: `cancel|submit|ignore`.
      * Has sense only for single editable element.
@@ -331,7 +331,7 @@ angular.module('xeditable').factory('editableController',
      * 
      * @var {string|attribute} blur
      * @memberOf editable-element
-     */     
+     */
     // no real `blur` property as it is transfered to editable form
 
     //init
@@ -452,9 +452,14 @@ angular.module('xeditable').factory('editableController',
         self.buttonsEl = angular.element(theme.buttonsTpl);
         self.submitEl = angular.element(theme.submitTpl);
         self.cancelEl = angular.element(theme.cancelTpl);
-        self.buttonsEl.append(self.submitEl).append(self.cancelEl);
+        self.unlimitedEl = angular.element(theme.unlimitedTpl);
+        if ($attrs.unlimtedEnabled == 'false') {
+            self.buttonsEl.append(self.submitEl).append(self.cancelEl);
+        } else {
+            self.buttonsEl.append(self.submitEl).append(self.cancelEl).append(self.unlimitedEl);
+        }
         self.controlsEl.append(self.buttonsEl);
-        
+
         self.inputEl.addClass('editable-has-buttons');
       }
 
@@ -700,6 +705,7 @@ angular.module('xeditable').factory('editableController',
     self.onshow = angular.noop;
     self.onhide = angular.noop;
     self.oncancel = angular.noop;
+    self.onunlimited = angular.noop;
     self.onbeforesave = angular.noop;
     self.onaftersave = angular.noop;
   }
@@ -1062,6 +1068,17 @@ angular.module('xeditable').factory('editableFormController',
           editable.setError(msg);
         }
       });
+    },
+
+    $setUnlimited: function() {
+      if (!this.$visible) {
+        return;
+      }
+      //clear errors
+      this.$setError(null, '');
+      //set null to be represented as unlimited
+      this.$editables[0]['scope']['$data'] = null;
+      this.$submit();
     },
 
     $submit: function() {
@@ -1503,46 +1520,49 @@ Editable themes:
 Note: in postrender() `this` is instance of editableController
 */
 angular.module('xeditable').factory('editableThemes', function() {
-  var themes = {
-    //default
-    'default': {
-      formTpl:      '<form class="editable-wrap"></form>',
-      noformTpl:    '<span class="editable-wrap"></span>',
-      controlsTpl:  '<span class="editable-controls"></span>',
-      inputTpl:     '',
-      errorTpl:     '<div class="editable-error" ng-show="$error" ng-bind="$error"></div>',
-      buttonsTpl:   '<span class="editable-buttons"></span>',
-      submitTpl:    '<button type="submit">save</button>',
-      cancelTpl:    '<button type="button" ng-click="$form.$cancel()">cancel</button>'
-    },
+    var themes = {
+        //default
+        'default': {
+            formTpl:      '<form class="editable-wrap"></form>',
+            noformTpl:    '<span class="editable-wrap"></span>',
+            controlsTpl:  '<span class="editable-controls"></span>',
+            inputTpl:     '',
+            errorTpl:     '<div class="editable-error" ng-show="$error" ng-bind="$error"></div>',
+            buttonsTpl:   '<span class="editable-buttons"></span>',
+            unlimitedTpl: '<button type="button" ng-click="$form.$setUnlimited()" title="Set Unlimited">unlimited</button>',
+            submitTpl:    '<button type="submit">save</button>',
+            cancelTpl:    '<button type="button" ng-click="$form.$cancel()">cancel</button>'
+        },
 
-    //bs2
-    'bs2': {
-      formTpl:     '<form class="form-inline editable-wrap" role="form"></form>',
-      noformTpl:   '<span class="editable-wrap"></span>',
-      controlsTpl: '<div class="editable-controls controls control-group" ng-class="{\'error\': $error}"></div>',
-      inputTpl:    '',
-      errorTpl:    '<div class="editable-error help-block" ng-show="$error" ng-bind="$error"></div>',
-      buttonsTpl:  '<span class="editable-buttons"></span>',
-      submitTpl:   '<button type="submit" class="btn btn-primary"><span class="icon-ok icon-white"></span></button>',
-      cancelTpl:   '<button type="button" class="btn" ng-click="$form.$cancel()">'+
-                      '<span class="icon-remove"></span>'+
-                   '</button>'
+        //bs2
+        'bs2': {
+            formTpl:     '<form class="form-inline editable-wrap" role="form"></form>',
+            noformTpl:   '<span class="editable-wrap"></span>',
+            controlsTpl: '<div class="editable-controls controls control-group" ng-class="{\'error\': $error}"></div>',
+            inputTpl:    '',
+            errorTpl:    '<div class="editable-error help-block" ng-show="$error" ng-bind="$error"></div>',
+            buttonsTpl:  '<span class="editable-buttons"></span>',
+            unlimitedTpl:'<button type="button" class="btn btn-danger" ng-click="$form.$setUnlimited()" title="Set Unlimited"><span class="icon-magnet"></span></button>',
+            submitTpl:   '<button type="submit" class="btn btn-primary" title="Submit"><span class="icon-ok icon-white"></span></button>',
+            cancelTpl:   '<button type="button" class="btn" ng-click="$form.$cancel()" title="Cancel">'+
+                '<span class="icon-remove"></span>'+
+                '</button>'
 
-    },
+        },
 
-    //bs3
-    'bs3': {
-      formTpl:     '<form class="form-inline editable-wrap" role="form"></form>',
-      noformTpl:   '<span class="editable-wrap"></span>',
-      controlsTpl: '<div class="editable-controls form-group" ng-class="{\'has-error\': $error}"></div>',
-      inputTpl:    '',
-      errorTpl:    '<div class="editable-error help-block" ng-show="$error" ng-bind="$error"></div>',
-      buttonsTpl:  '<span class="editable-buttons"></span>',
-      submitTpl:   '<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span></button>',
-      cancelTpl:   '<button type="button" class="btn btn-default" ng-click="$form.$cancel()">'+
-                     '<span class="glyphicon glyphicon-remove"></span>'+
-                   '</button>',
+        //bs3
+        'bs3': {
+            formTpl:     '<form class="form-inline editable-wrap" role="form"></form>',
+            noformTpl:   '<span class="editable-wrap"></span>',
+            controlsTpl: '<div class="editable-controls form-group" ng-class="{\'has-error\': $error}"></div>',
+            inputTpl:    '',
+            errorTpl:    '<div class="editable-error help-block" ng-show="$error" ng-bind="$error"></div>',
+            buttonsTpl:  '<span class="editable-buttons"></span>',
+            unlimitedTpl:'<button type="button" class="btn btn-danger" ng-click="$form.$setUnlimited()" title="Set Unlimited"><span class="glyphicon glyphicon-magnet"></span></button>',
+            submitTpl:   '<button type="submit" class="btn btn-primary" title="Submit"><span class="glyphicon glyphicon-ok"></span></button>',
+            cancelTpl:   '<button type="button" class="btn btn-default" title="Cancel" ng-click="$form.$cancel()">'+
+                '<span class="glyphicon glyphicon-remove"></span>'+
+                '</button>',
 
       //bs3 specific prop to change buttons class: btn-sm, btn-lg
       buttonsClass: '',
